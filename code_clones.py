@@ -14,6 +14,7 @@ def read_file(file_path: str) -> str:
     with open(file_path, 'r') as file:
         return file.read()
 
+# CAN USE THIS IN THE GROUP PROJECT to identify code clones. Use it on Arrow.
 def compute_jaccard_similarity(a: str, b: str) -> float:
     """
     Compute the Jaccard similarity between two programs.
@@ -26,10 +27,16 @@ def compute_jaccard_similarity(a: str, b: str) -> float:
     a_content = read_file(a).splitlines()
     b_content = read_file(b).splitlines()
 
-    # TODO: Implement the rest of this function
+    a_set = set(a_content)
+    b_set = set(b_content)
 
-    return 0
+    a_length = len(a_set)
+    b_length = len(b_set)
+    a_and_b_length = len (a_set & b_set)
 
+    return a_and_b_length / (a_length + b_length - a_and_b_length)
+
+# This can also be used to identify code clones, and actually visualise them. We should use this on Arrow.
 def visualise_dot_plot(a: str, b: str) -> str:
     a_content = read_file(a).splitlines()
     b_content = read_file(b).splitlines()
@@ -38,11 +45,10 @@ def visualise_dot_plot(a: str, b: str) -> str:
     for i in range(len(a_content)):
         plot += f'x{i}: {a_content[i]}\n'
     plot += '-' * 80 + '\n'
+
     for j in range(len(b_content)):
         plot += f'y{j}: {b_content[j]}\n'
     plot += '-' * 80 + '\n'
-
-    # TODO: Implement the rest to return the dot plot for the two given programs (a: x-axis, b: y-axis)
 
     # Below is a sample output:
     '''
@@ -77,6 +83,18 @@ def visualise_dot_plot(a: str, b: str) -> str:
     '''
 
     plot += '\t'
+    for i in range(len(a_content)):
+        plot += f"x{i}\t"
+    plot += '\n'
+    for j in range(len(b_content)):
+        plot += f"y{j}\t"
+        for i in range(len(a_content)):
+            if a_content[i] == b_content[j]:
+                plot += f"*\t"
+            else:
+                plot += f" \t"
+        plot += '\n'
+
     plot += '-' * 80
 
     return plot.strip()
