@@ -26,6 +26,7 @@ def read_file(file_path: str) -> list[str]:
         #     read = True
         return file.readlines()
 
+# CAN USE THIS IN THE GROUP PROJECT to identify code clones. Use it on Arrow.
 def compute_jaccard_similarity(a: str, b: str) -> float:
     """
     Compute the Jaccard similarity between two programs.
@@ -51,6 +52,7 @@ def visualise_dot_plot(a: str, b: str) -> str:
     for i in range(len(a_content)):
         plot += f'x{i}: {a_content[i]}'
     plot += '-' * 80 + '\n'
+
     for j in range(len(b_content)):
         plot += f'y{j}: {b_content[j]}'
     plot += '-' * 80 + '\n'
