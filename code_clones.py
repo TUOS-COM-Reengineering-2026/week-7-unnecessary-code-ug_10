@@ -2,9 +2,9 @@ import os
 import matplotlib.pyplot as plt
 from matplotlib.ticker import MaxNLocator
 import numpy as np
+import ast
+import re
 
-ASSIGNMENT = '='
-BOOLEAN = ['==', '!=','<=','>=','<','>']
 
 def read_file(file_path: str) -> list[str]:
     """
@@ -36,11 +36,17 @@ def compute_jaccard_similarity(a: str, b: str) -> float:
     :return: The Jaccard similarity between the two programs.
     """
 
-    a_content = read_file(a)
-    b_content = read_file(b)
+    #Keeping this if you want to test the entire files 
+    # (might also need to normalise all of the lines of code though...)
 
-    a_set = set(a_content)
-    b_set = set(b_content)
+    # a_content = read_file(a)
+    # b_content = read_file(b)
+
+    # a_set = set(a_content)
+    # b_set = set(b_content)
+
+    a_set = set(map(normalize, a))
+    b_set = set(map(normalize, b))
 
     return len(a_set & b_set)/len(a_set | b_set)
 
@@ -76,86 +82,76 @@ def visualise_dot_plot(a: str, b: str) -> str:
 
 
 
+def find_method(path_file: str, method_name: str) -> list[str]:
 
-def find_method(path_file, method_name) -> list[str]:
-    IDENTIFIER = "def"
-    content = read_file(path_file)
-    print(len(content))
+    with open(path_file, "r") as f:
+        source = f.read()
 
-    method_code = []
-    reading_code = False
+    tree = ast.parse(source)
+    lines = source.splitlines()
 
-    for line in content:
-        
-        if reading_code:
-            method_code.append(line)
+    for node in ast.walk(tree):
+        if isinstance(node, ast.FunctionDef) and node.name == method_name:
+            start = node.lineno - 1
+            end = node.end_lineno
+            return lines[start:end]
 
-        if line.startswith(IDENTIFIER):
-            if method_name in line and not reading_code:
-                method_code.append(line)
-                reading_code = True
-            else:
-                reading_code = False
-                
-                
-    return method_code
+    return []
 
-def draw_graph(a: str, b: str):
-    column_content = find_method(a, "fromordinal(cls, ordinal: int)")
-    row_content = find_method(b, "strptime(cls, date_str: str, fmt: str, tzinfo: Optional[TZ_EXPR] = None)")
 
-    xdata = np.array([])
-    ydata = np.array([])
+def normalize(line: str) -> str:
+    line = re.sub(r"#.*", "", line)  # remove comments
+    return line.strip()
 
-    for j in range (len(row_content)):
-        #print(f"j: {j}")
+def draw_graph(file1: str, file2: str, func1: str, func2: str):
+    column_content = find_method(file1, func1)
+    row_content = find_method(file2, func2)
+
+    xdata = []
+    ydata = []
+
+    for j in range(len(row_content)):
         for i in range(len(column_content)):
-            #print(f"i: {i}")
-            if column_content[i].strip() == row_content[j].strip():
-                xdata = np.append(xdata, [i+1])
-                ydata = np.append(ydata, [j+1])
-
+            if normalize(column_content[i]) == normalize(row_content[j]):
+                xdata.append(i + 1)
+                ydata.append(j + 1)
 
     fig, ax = plt.subplots()
-    print(xdata)
     ax.plot(xdata, ydata, 'o')
     ax.tick_params(top=True, labeltop=True, bottom=False, labelbottom=False)
     ax.invert_yaxis()
-    ax.xaxis.set_major_locator(MaxNLocator(integer=True))
-    ax.yaxis.set_major_locator(MaxNLocator(integer=True))
-    
-    plt.show()
 
+    plt.show()
 
 
 if __name__ == "__main__":
     path_dir = r"d:\modules25_26\Reengineering\arrow-repo\arrow"
 
     #Change this absolute path to test the 2 files listed below
-    test_path = "d:\modules25_26\Reengineering\week-7-unnecessary-code-ug_10"
-    file = "dead_code.py"
-    file2 = "dying_code.py"
+    #test_path = "d:\modules25_26\Reengineering\week-7-unnecessary-code-ug_10"
+    file = "arrow.py"
+    #file2 = "arrow.py"
     
-
-    line1 = "t = 5"
-    line2 = "x = 5"
 
     #is_same_variable_name(line1,line2)
 
-    path_file = os.sep.join([test_path, file])
-    #find_method(path_file, "example_function():")
-    # print(path_file1)
-    path_file2 = os.sep.join([test_path, file2])
+    func1 = "fromordinal"
+    func2 = "strptime"
 
-    draw_graph(path_file, path_file2)
+    path_file = os.sep.join([path_dir, file])
 
-    #graph = visualise_dot_plot(path_file, path_file2)
-    #print(graph)
+    method1 = find_method(path_file, func1)
+    method2 = find_method(path_file, func2)
 
-    # print("\n")
+    if not method1:
+        print(f"Function {func1} not found in {file}")
+    if not method2:
+        print(f"Function {func2} not found in {file}")
 
-    # similarity = compute_jaccard_similarity(path_file1, path_file2)
+    similarity = compute_jaccard_similarity(method1, method2)
+    print(f"\n Jaccard similarity: {similarity}")
+    
 
-    # print(similarity)
+    draw_graph(path_file, path_file, func1, func2)
 
 
