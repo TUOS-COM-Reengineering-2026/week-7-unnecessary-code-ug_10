@@ -82,7 +82,7 @@ def visualise_dot_plot(a: str, b: str) -> str:
 
 
 
-def find_method(path_file: str, method_name: str) -> list[str]:
+def find_method(path_file: str, method_name: str, num_args=None) -> list[str]:
 
     with open(path_file, "r") as f:
         source = f.read()
@@ -92,9 +92,11 @@ def find_method(path_file: str, method_name: str) -> list[str]:
 
     for node in ast.walk(tree):
         if isinstance(node, ast.FunctionDef) and node.name == method_name:
-            start = node.lineno - 1
-            end = node.end_lineno
-            return lines[start:end]
+            actual_args = len(node.args.args)
+            if num_args is None or actual_args == num_args:
+                start = node.lineno - 1
+                end = node.end_lineno
+                return lines[start:end]
 
     return []
 
