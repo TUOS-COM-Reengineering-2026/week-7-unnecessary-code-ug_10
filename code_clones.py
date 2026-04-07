@@ -125,33 +125,35 @@ def draw_graph(file1: str, file2: str, func1: str, func2: str):
 
 
 if __name__ == "__main__":
+    #Change this for your local file location of the repo
     path_dir = r"d:\modules25_26\Reengineering\arrow-repo\arrow"
 
-    #Change this absolute path to test the 2 files listed below
-    #test_path = "d:\modules25_26\Reengineering\week-7-unnecessary-code-ug_10"
-    file = "arrow.py"
-    #file2 = "arrow.py"
-    
-
-    #is_same_variable_name(line1,line2)
+    # Change the name files with the methods you want to scan
+    file1 = "arrow.py"
+    file2 = "factory.py"
 
     func1 = "fromordinal"
     func2 = "strptime"
 
-    path_file = os.sep.join([path_dir, file])
+    path_file1 = os.sep.join([path_dir, file1])
+    path_file2 = os.sep.join([path_dir, file2])
 
-    method1 = find_method(path_file, func1)
-    method2 = find_method(path_file, func2)
+    #Comment this out if you want to scan different files
+    # I am testing only the "arrow.py" file for this setup, but different methods
+    path_file2 = path_file1
+
+    method1 = find_method(path_file1, func1)
+    method2 = find_method(path_file1, func2)
 
     if not method1:
-        print(f"Function {func1} not found in {file}")
+        print(f"Function {func1} not found in {file1}")
     if not method2:
-        print(f"Function {func2} not found in {file}")
+        print(f"Function {func2} not found in {file2}")
 
     similarity = compute_jaccard_similarity(method1, method2)
     print(f"\n Jaccard similarity: {similarity}")
     
 
-    draw_graph(path_file, path_file, func1, func2)
+    draw_graph(path_file1, path_file2, func1, func2)
 
 
